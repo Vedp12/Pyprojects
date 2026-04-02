@@ -1,6 +1,7 @@
 from functools import lru_cache
 import time
 
+
 @lru_cache(maxsize=None)
 def user(name, id):
     time.sleep(3)
@@ -8,6 +9,7 @@ def user(name, id):
         return f"{name}\nID is recognised as {id}"
     else:
         return f"{name}\n{id}"
+
 
 # Print the returned value
 print(user("ved", 10))

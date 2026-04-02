@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class vechile(ABC):
     @abstractmethod
     def go(self):
@@ -8,6 +9,7 @@ class vechile(ABC):
     @abstractmethod
     def stop(self):
         pass
+
 
 class Car(vechile):
     def go(self):
@@ -24,12 +26,8 @@ class Bike(vechile):
     def stop(self):
         print("You can stop!")
 
+
 B1 = Bike()
 B1.go()
 B2 = Bike()
 B2.stop()
-
-
-
-
-

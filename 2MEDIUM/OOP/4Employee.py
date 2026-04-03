@@ -16,6 +16,5 @@
 - Use **encapsulation** for all attributes and provide **getters and setters**.
 - Demonstrate **polymorphism** by calculating salaries for a list of employees of different types.
 """
+
 from abc import ABC, abstractmethod
-
-

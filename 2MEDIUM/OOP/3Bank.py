@@ -40,7 +40,6 @@ class Account(ABC):
 
     @abstractmethod
     def deposit(self, amount):
-
         pass
 
     @abstractmethod
@@ -73,7 +72,13 @@ class SavingsAccount(Account):
         return f"\n{self.get_account_name_()} has balance of {self.balance} in Savings account \n\n"
 
 
-person1 = SavingsAccount("ved", 5000, 2.5)
+class CurrentAccount(Account):
+    def __init__(self, account_name: str, balance: float, Overdraft_limit=5000):
+        super().__init__(account_name, balance)
+        self.overdraft_limit = Overdraft_limit
+
+
+person1 = SavingsAccount("ved", 50000, 2.5)
 person1.deposit(200)
 person1.withdraw(300)
 print(person1.display_info())

@@ -1,0 +1,72 @@
+import csv
+
+print("1.add, 2.edit, 3.view, 4.exit")
+choice = int(input("Enter the choice: "))
+
+match choice:
+    case 1:
+        print("\n-----ADD DATA-----\n")
+        header = ["No", "Date", "Amount", "Category"]
+
+        with open("expense.csv", "a", newline="") as file:
+            csv_writer = csv.DictWriter(file, fieldnames=header)
+
+            No0 = input("Enter Number : ")
+            Date1 = input("Enter Date : ")
+            Amount2 = input("Enter Amount : ")
+            Category3 = input("Enter Category : ")
+
+            data = {
+                "No": No0,
+                "Date": Date1,
+                "Amount": Amount2,
+                "Category": Category3,
+            }
+
+            csv_writer.writerow(data)
+
+    case 2:
+        print("\n-----EDIT DATA-----\n")
+        header = ["No", "Date", "Amount", "Category"]
+
+        # Step 1: Read all data
+        with open("expense.csv", "r") as file:
+            csv_reader = csv.DictReader(file)
+            data = list(csv_reader)
+
+        user_no = input("Enter no to which you want to edit: ")
+
+        # Step 2: Modify in memory
+        for row in data:
+            if row["No"] == user_no:
+                choice_field = input(
+                    "\nWhat field you want to edit?\n1. No, 2. Date, 3. Amount, 4. Category\n"
+                )
+                choice_data = input("Enter new value: ")
+
+                if choice_field == "1":
+                    row["No"] = choice_data
+                elif choice_field == "2":
+                    row["Date"] = choice_data
+                elif choice_field == "3":
+                    row["Amount"] = choice_data
+                elif choice_field == "4":
+                    row["Category"] = choice_data
+
+        # Step 3: Rewrite full file
+        with open("expense.csv", "w", newline="") as file:
+            csv_writer = csv.DictWriter(file, fieldnames=header)
+            csv_writer.writeheader()
+            csv_writer.writerows(data)
+
+        print("\nData updated successfully!")
+
+    case 3:
+        print("\n-----VIEW DATA -----\n")
+        with open("expense.csv", "r") as file:
+            csv_reader = csv.reader(file)
+            for row in csv_reader:
+                print(row)
+
+    case 4:
+        print("\n-----Program exited-----\n")

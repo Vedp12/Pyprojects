@@ -29,11 +29,10 @@ Register_member_list = []
 
 
 class Book(ABC):
-    def __init__(self, book_title: str, author: str, isbn, available: bool):
+    def __init__(self, book_title: str, author: str, isbn):
         self.__book_title = book_title
         self.__author = author
         self.__isbn = isbn
-        self.__available = available
 
     @property
     def get_title(self):
@@ -46,21 +45,6 @@ class Book(ABC):
     @property
     def get_isbn(self):
         return self.__isbn
-
-    @property
-    def Availability(self):
-        return self.__available
-
-    @Availability.setter
-    def Availability(self, set_available):
-        if self.__book_title in Book_list:
-            print("Book is available in library")
-            set_available == True
-        else:
-            print("Book will be available in library")
-            set_available == False
-            Book_list.append(self.__book_title)
-            self.__available = set_available
 
     def Dispay_book_info(self):
         print(
@@ -164,10 +148,11 @@ class Library(Member, Book):
         print(Book_list)
 
 
-B1 = Book("Python", "Ved", "CESA89745", True)
+B1 = Book("Python", "Ved", "CESA89745")
 B1.Dispay_book_info()
 M1 = Member("Tux", 874562, "Python")
-M1.borrow_book = "python22"
 M1.Dispay_member_info()
-L1 = Library("java", "python", "kay")
-L1.Dispay_Library_info()
+# M1.borrow_book = "python22"
+# M1.Dispay_member_info()
+# L1 = Library("java", "python", "kay")
+# L1.Dispay_Library_info()

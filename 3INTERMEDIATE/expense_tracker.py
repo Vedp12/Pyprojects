@@ -6,9 +6,10 @@ choice = int(input("Enter the choice: "))
 match choice:
     case 1:
         print("\n-----ADD DATA-----\n")
-        header = ["No", "Date", "Amount", "Category"]
 
         with open("expense.csv", "a", newline="") as file:
+
+            header = ["No", "Date", "Amount", "Category"]
             csv_writer = csv.DictWriter(file, fieldnames=header)
 
             No0 = input("Enter Number : ")
@@ -64,6 +65,7 @@ match choice:
     case 3:
         print("\n-----VIEW DATA -----\n")
         with open("expense.csv", "r") as file:
+
             csv_reader = csv.reader(file)
             for row in csv_reader:
                 print(row)

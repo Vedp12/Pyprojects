@@ -1,6 +1,6 @@
 import time
 import datetime
-import notifypy
+from notifypy import Notify
 import chime
 
 print("Hello,This is a Recoder timer \n-----------ADD TIMER-----------\n")
@@ -15,10 +15,12 @@ time.sleep(Timer * 60)
 End_timer = time.time()
 Set_time = End_timer - Start_timer
 
-notification = notifypy.Notify()
-notification.title = "Time over !!"
-notification.message = f"Timer seted for {Set_time:.2f} is over!"
-notification.send()
+#
+notifiction = Notify()
+notifiction.title = "Times up !"
+notifiction.message = f"You time of {Timer*60.0} min is over"
+notifiction.send()
+
 
 now = datetime.datetime.now()
 chime.info()

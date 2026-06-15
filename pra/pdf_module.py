@@ -29,9 +29,9 @@ page = reader.pages[0]
 
 for page_index, page in enumerate(reader.pages):
     count = 1
-    
+
     for image_file in page.images:
-        filename = f"{count}_{page_index}_{image_file.name}"  #^ Filename that must ends with .name for giving the images name
+        filename = f"{count}_{page_index}_{image_file.name}"  # ^ Filename that must ends with .name for giving the images name
         with open(filename, "wb") as fp:
             fp.write(image_file.data)
             count += 1

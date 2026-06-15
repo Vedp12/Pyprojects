@@ -1,0 +1,18 @@
+Key Points:
+
+Indexing: Line 1 is index 0, so Line 6 is index 5.
+Safety: The if len(lines) >= 6 check ensures the code does not crash if the file has fewer than 6 lines. 
+Memory Efficiency: For very large files (e.g., >100MB), it is better to use a temporary file approach: read line-by-line, write all lines except line 6 to a new file, then replace the original file with the new one. 
+How to delete a specific line in a text file using Python?
+🌐
+stackoverflow.com › questions › 4710067 › how-to-delete-a-specific-line-in-a-file
+First, open the file and get all your lines from the file. Then reopen the file in write mode and write your lines back, except for the line you want to delete:
+
+with open("yourfile.txt", "r") as f:
+    lines = f.readlines()
+with open("yourfile.txt", "w") as f:
+    for line in lines:
+        if line.strip("\n") != "nickname_to_delete":
+            f.write(line)
+You need to strip("\n") the newline character in the comparison because if your file doesn't end with a newline character the very last line won't either.
+Answer from houbysoft on Stack Overflow

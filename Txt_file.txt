@@ -1,0 +1,5 @@
+Hello how are you?
+This is txt is written in terminal through VIM.
+error.
+error.
+

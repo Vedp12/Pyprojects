@@ -1,0 +1,26 @@
+.add_sign_Btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 45px;
+  height: 45px;
+  border-radius: calc(45px/2);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition-duration: .3s;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+  background: #4e46e5;
+}
+
+/* plus sign */
+.add_profile_sign {
+  width: 100%;
+  font-size: 2.2em;
+  color: white;
+  transition-duration: .3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

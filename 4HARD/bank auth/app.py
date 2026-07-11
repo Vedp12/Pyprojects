@@ -8,7 +8,7 @@ from flask_jwt_extended import (
     get_jwt,
     get_jwt_identity,
 )
-from flask_sqlalchemy import SQLAlchemy  
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 
 import os
@@ -20,19 +20,17 @@ env.read_env()
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'bank_auth.db')}"
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    f"sqlite:///{os.path.join(basedir, 'bank_auth.db')}"
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-app.config["JWT_SECRET_KEY"] = env("JWT_SECRET_KEY")
+app.config["JWT_SECRET_KEY"] = "578646549845dasdsadgaksjdhasjhdiuqey6468daskdjaskdh"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=7)
 
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
-
-# with app.app_context():
-#     db.create_all()
-#     print("database created")
 
 class Authentication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -40,28 +38,43 @@ class Authentication(db.Model):
     email = db.Column(db.String(60), nullable=False, unique=True)
     password = db.Column(db.String(260), nullable=False)
 
+class Account_Data(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    account_no = db.Column(db.Integer, nullable=False)
+    account_pin = db.Column(db.Integer, nullable=False)
+    BankBalance = db.Column(db.Integer, default=0)
+
+class Account_deposite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    deposited = db.Column(db.Integer,nullable=False)
+
+class Account_withdrawal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    withdrawal = db.Column(db.Integer, nullable=False)
+    account_pin = db.Column(db.Integer, nullable=False)
+    # BankBalance = db.Column(db.Integer, default=0)
 
 @app.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json(silent=True)
     if not data:
-        return jsonify({"error": "data is not in json format"}), 400
+        return jsonify({"error": "data is not in json format"}), 401
     name = data.get("name")
     email = data.get("email")
     password = data.get("password")
     if not name or not email or not password:
         return jsonify({"error": "All field are required"}), 400
-    # "@gmail" or "@yahoo" or "Outlook" or "@tuta"
+
     if "@" not in email:
         return jsonify({"error": "email is incorrect"}), 400
     if not name.strip():
-        return jsonify({"error": "name not be empty!"})
+        return jsonify({"error": "name not be empty!"}), 400
     if Authentication.query.filter_by(email=email).first():
-        return jsonify({"error": "mail already exist "})
-    
+        return jsonify({"error": "mail already exist "}), 400
+
     HashedPassword = generate_password_hash(password)
     new_auth = Authentication(name=name, email=email, password=HashedPassword)
-    
+
     try:
         db.session.add(new_auth)
         db.session.commit()
@@ -69,16 +82,26 @@ def signup():
         db.session.rollback()
         return jsonify({"error": "email already exists"}), 409
     except Exception:
-        return jsonify({"error":"something went wrong"}),400
-    return jsonify({"success":"user created successfully"}),201
-
+        db.session.rollback()
+        return jsonify({"error": "something went wrong"}), 400
+    access_token = create_access_token(identity=email)
+    refresh_token = create_refresh_token(identity=email)
+    return (
+        jsonify(
+            {
+                "success": "user created successfully",
+                "accesstoken": access_token,
+                "refreshtoken": refresh_token,
+            }
+        ),
+        201,
+    )
 
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
+    data = request.get_json(silent=True)
     if not data:
-        return jsonify({"error": "data is not in json format"})
-    # name = data.get("name")
+        return jsonify({"error": "data is not in json format"}), 401
     email = data.get("email")
     password = data.get("password")
 
@@ -96,6 +119,86 @@ def login():
     refresh_token = create_refresh_token(identity=email)
     return jsonify({"access_token": access_token, "refresh_token": refresh_token})
 
+@app.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    return jsonify({"access_token": new_access_token}), 200
+
+@app.route("/home", methods=["GET"])
+@jwt_required()
+def home():
+    email = get_jwt_identity()
+    user = Authentication.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "user not found"}), 401
+    return jsonify({"name": user.name, "email": user.email}), 200
+
+@app.route("/account", methods=["POST"])
+@jwt_required()
+def account():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "data is not in json format"}), 401
+    account_no = data.get("account_no")
+    account_pin = data.get("account_pin")
+    if not account_no or not account_pin:
+        return jsonify({"error": "All fields are required"}), 400
+    if (account_pin) < 999 or (account_pin) > 10000:
+        return jsonify({"error": "pin is size invalid"}), 400
+    BankBalance = data.get("BankBalance")
+    account_info = Account_Data(
+        account_no=account_no, account_pin=account_pin, BankBalance=BankBalance
+    )
+    try:
+        db.session.add(account_info)
+        db.session.commit()
+        return jsonify({"success": f"{BankBalance}"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"This went wrong {e}"}), 400
+
+@app.route("/deposite", methods=["POST"])
+@jwt_required()
+def deposite():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "data is not in json format"}), 401
+    deposited = data.get("deposited")
+    if not deposited:
+        return jsonify({"error": "deposited amount is required"}), 400
+
+    Deposite_Value = Account_deposite(deposited=deposited)
+    try:
+        db.session.add(Deposite_Value)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"This went wrong:\n{e}"}), 400
+    return jsonify({"success": f"{deposited}"}), 201
+
+@app.route("/withdrawal", methods=["POST"])
+@jwt_required()
+def withdrawal():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "data is not in json format"}), 401
+    withdrawal = data.get("withdrawal")
+    account_pin = data.get("account_pin")
+    if not withdrawal :
+        return jsonify({"error": "All fields are required"}), 400
+
+    withdrawal_entry = Account_withdrawal(withdrawal=withdrawal,account_pin=account_pin)
+    try:
+        db.session.add(withdrawal_entry)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"This went wrong: {e}"}), 400
+    return jsonify({"success": f"{withdrawal}"}), 201
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(port="5002")

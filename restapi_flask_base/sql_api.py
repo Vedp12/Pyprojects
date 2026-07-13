@@ -19,7 +19,8 @@ class ToDoModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task = db.Column(db.String(200))
     summary = db.Column(db.String(500))
-with app.app_context():
+with app.app_context():from datetime import timedelta
+
    db.create_all()
 
 

@@ -174,19 +174,20 @@ def account():
         db.session.rollback()
         return jsonify({"error": f"This went wrong {e}"}), 400
 
+
 @app.route("/deposite", methods=["POST"])
 @jwt_required()
 def deposite():
     data = request.get_json()
     if not data:
         return jsonify({"error": "data is not in json format"}), 401
-        
+
     deposited = data.get("deposited")
     deposited_pin = data.get("account_pin")
-    
+
     if not deposited or not deposited_pin:
         return jsonify({"error": "All fields are required"}), 400
-        
+
     # Query by the pin provided in the request body
     account = Account_Data.query.filter_by(account_pin=deposited_pin).first()
     if not account:
@@ -194,7 +195,7 @@ def deposite():
 
     # Update the actual bank balance
     account.BankBalance += int(deposited)
-    
+
     Deposite_Value = Account_deposite(deposited=deposited, account_pin=deposited_pin)
     try:
         db.session.add(Deposite_Value)
@@ -202,8 +203,13 @@ def deposite():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Something went wrong: {e}"}), 400
-        
-    return jsonify({"success": f"Deposited {deposited}. New Balance: {account.BankBalance}"}), 201
+
+    return (
+        jsonify(
+            {"success": f"Deposited {deposited}. New Balance: {account.BankBalance}"}
+        ),
+        201,
+    )
 
 
 @app.route("/withdrawal", methods=["POST"])
@@ -217,13 +223,15 @@ def withdrawal():
     if not withdrawal or not withdrawal_pin:
         return jsonify({"error": "withdrawl amount is required"}), 400
     withdrawal_pin = data.get("account_pin")
-    account_withrawl_pin = Authentication.query.filter_by(account_pin=withdrawal_pin).first()
+    account_withrawl_pin = Authentication.query.filter_by(
+        account_pin=withdrawal_pin
+    ).first()
 
     if not account_withrawl_pin:
-        return jsonify({"error":"account pin is incorrect try again"})
+        return jsonify({"error": "account pin is incorrect try again"})
     if withdrawal < account_withrawl_pin.BankBalance:
-        return jsonify({"error":"your withdrawl amount is more than bankbalance"}),400
-    
+        return jsonify({"error": "your withdrawl amount is more than bankbalance"}), 400
+
     account_withrawl_pin.BankBalance -= withdrawal
 
     withdrawal_Value = Account_withdrawal(
@@ -235,7 +243,14 @@ def withdrawal():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"This went wrong: {e}"}), 400
-    return jsonify({"success": f"Your money is {withdrawal} now you have total of {account_withrawl_pin.BankBalance}"}), 201
+    return (
+        jsonify(
+            {
+                "success": f"Your money is {withdrawal} now you have total of {account_withrawl_pin.BankBalance}"
+            }
+        ),
+        201,
+    )
 
 
 if __name__ == "__main__":

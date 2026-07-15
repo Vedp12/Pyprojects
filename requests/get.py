@@ -10,11 +10,9 @@ if respond.status_code == 200:
     print(data["data"]["gender"])
     print(data["data"]["location"]["coordinates"]["longitude"])
     print(data["data"]["dob"]["age"])
-    with open("data.txt","a")as file:
-            print(file.write(data["data"]["name"]["first"]))
+    with open("data.txt", "a") as file:
+        print(file.write(data["data"]["name"]["first"]))
 
-            print(file.write(data["data"]["gender"]))
+        print(file.write(data["data"]["gender"]))
 
-            print(file.write(data["data"]["location"]["coordinates"]["longitude"]))
-        
-
+        print(file.write(data["data"]["location"]["coordinates"]["longitude"]))

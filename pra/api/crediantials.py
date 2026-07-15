@@ -75,24 +75,30 @@ def login():
 
     return jsonify(access_token=access_token, refresh_token=refresh_token), 200
 
-@app.route('/logout',methods=["DELETE"])
+
+@app.route("/logout", methods=["DELETE"])
 @jwt_required
 def logout():
     jti = get_jwt["jti"]
     BLOCKLIST.add(jti)
-    return jsonify({"msg":"successfully logout"}),200
+    return jsonify({"msg": "successfully logout"}), 200
 
-@app.route('/refresh',methods=["POST"])
+
+@app.route("/refresh", methods=["POST"])
 def refresh():
     identity = get_jwt_identity()
     new_access_token = create_access_token(identity=identity)
-    return jsonify(access_token=new_access_token),200
+    return jsonify(access_token=new_access_token), 200
+
 
 app.route("/protected", methods=["GET"])
+
+
 @jwt_required()
 def protected():
     current_user = get_jwt_identity()
     return jsonify({"success": f"User logged in as {current_user}"}), 200
+
 
 if __name__ == "__main__":
     app.run(port="5001")

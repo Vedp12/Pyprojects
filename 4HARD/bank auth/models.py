@@ -33,6 +33,9 @@ class user_login(db.Model):
     user_name = db.Column(db.String(160), nullable=False)
     user_age = db.Column(db.Integer, nullable=False)
     user_email = db.Column(db.String(40))
+    user_password = db.Column(db.string(150), nullable=False)
+
+    user_
     user_created = db.Column(db.datetime, default=datetime.utcnow)
 
 

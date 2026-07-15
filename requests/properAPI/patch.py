@@ -7,7 +7,7 @@ url = f"https://api.freeapi.app/api/v1/todos/{todo_id}"
 updated_data = {
     "isDone": True,
     "title": "do nothing",
-    "description": "DO nothing just chill"
+    "description": "DO nothing just chill",
 }
 
 response = requests.patch(url, json=updated_data)

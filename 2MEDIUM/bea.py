@@ -19,6 +19,7 @@ HEADERS = {
     )
 }
 
+
 def fetch_page():
     time.sleep(2)
     session = requests.Session()  # capital S in Session
@@ -32,6 +33,7 @@ def fetch_page():
     else:
         print(f"Failed: {response.status_code} — {response.text[:200]}")
         return None
+
 
 def parse_products(html):
     soup = BeautifulSoup(html, "html.parser")
@@ -52,7 +54,11 @@ def parse_products(html):
         print("---")
         print("Name :", name.get_text(strip=True) if name else "N/A")
         print("Price:", price.get_text(strip=True) if price else "N/A")
-        print("Link :", "https://www.flipkart.com" + link_tag["href"] if link_tag else "N/A")
+        print(
+            "Link :",
+            "https://www.flipkart.com" + link_tag["href"] if link_tag else "N/A",
+        )
+
 
 if __name__ == "__main__":
     html = fetch_page()

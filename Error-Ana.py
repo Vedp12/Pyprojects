@@ -1,4 +1,4 @@
-with open ("Txt_file.txt","r") as file:
+with open("Txt_file.txt", "r") as file:
     error_count = 0
     for check in file:
         print(check)

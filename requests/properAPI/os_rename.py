@@ -1,9 +1,9 @@
-from os import listdir,rename,chdir
+from os import listdir, rename, chdir
 
 chdir(r"/home/tux_106/Downloads/better call saul")
-AllFile=[]
+AllFile = []
 try:
-    for no,i in enumerate(listdir()):
+    for no, i in enumerate(listdir()):
         # print(i)
         # AllFile.update([no,i])
         AllFile.append(i)

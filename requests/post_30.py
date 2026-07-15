@@ -6,7 +6,7 @@ payload = {
     "title": "oops",
     "description": "compete oops in python work",
     "iscomplete": False,
-    "mesage": "hellow world"
+    "mesage": "hellow world",
 }
 
 response = requests.post(base_url, json=payload)

@@ -1,7 +1,8 @@
 import requests
-response = requests.get('https://httpbin.org/get')
+
+response = requests.get("https://httpbin.org/get")
 print(response.status_code)  # Outputs: 200
-print(response.json())        # Outputs: JSON response
+print(response.json())  # Outputs: JSON response
 
 url = "https://books.toscrape.com/"
 headers = {

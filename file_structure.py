@@ -1,5 +1,6 @@
 import os
 
+
 def display_files(dst):
     total_files = 0
     total_folders = 0

@@ -1,4 +1,3 @@
-
 #! Login code
 import requests
 
@@ -8,8 +7,9 @@ payload = {
     "email": "ved68986@gmail.com",
     "password": "test@123",
     "role": "ADMIN",
-    "username": "vedjohn"
+    "username": "vedjohn",
 }
+
 
 def register():
     response = requests.post(API_URL, json=payload)
@@ -45,14 +45,11 @@ payload = {
     "password": "test@123",
 }
 
-#! Register code  
+
+#! Register code
 def login():
     try:
-        response = requests.post(
-            API_URL,
-            json=payload,
-            timeout=20
-        )
+        response = requests.post(API_URL, json=payload, timeout=20)
 
         print(f"Status Code: {response.status_code}")
 
@@ -110,4 +107,3 @@ def login():
 
 if __name__ == "__main__":
     login()
-    

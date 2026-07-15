@@ -1,5 +1,0 @@
-
-print("hello")
-a = "10"
-b = "12"
-print(a+b)

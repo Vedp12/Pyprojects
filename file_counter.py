@@ -13,7 +13,7 @@ SKIP_DIRS = {
     "/var/cache",
     "/var/lib/docker",
     "/lost+found",
-    "/linuxbrew"
+    "/linuxbrew",
 }
 
 # Folder names to ignore wherever found
@@ -28,8 +28,7 @@ SKIP_NAMES = {
     ".mypy_cache",
     ".pytest_cache",
     ".npm",
-    ".cache"
-
+    ".cache",
 }
 
 total_files = 0
@@ -52,16 +51,9 @@ def should_skip(path):
 # Change this if you want another starting location
 START_PATH = "/home"
 
-for root, dirs, files in os.walk(
-    START_PATH,
-    topdown=True,
-    followlinks=False
-):
+for root, dirs, files in os.walk(START_PATH, topdown=True, followlinks=False):
     # Remove skipped directories before descending
-    dirs[:] = [
-        d for d in dirs
-        if not should_skip(os.path.join(root, d))
-    ]
+    dirs[:] = [d for d in dirs if not should_skip(os.path.join(root, d))]
 
     folder_count = len(dirs)
     file_count = len(files)

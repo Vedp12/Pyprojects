@@ -1,3 +1,6 @@
+from contextlib import redirect_stdout
+from types import NoneType
+
 from flask import Flask, jsonify, request, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import (
@@ -10,13 +13,16 @@ from flask_jwt_extended import (
 )
 from sqlalchemy.exc import IntegrityError
 import os
+
 from environs import Env
 from datetime import timedelta
 from models import *
+from functools import wraps
+
 
 env = Env()
 env.read_env()
-app = Flask(__app__)
+app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLAlchemy_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir,'bank.db')}"
@@ -36,11 +42,6 @@ finally:
 
 jwt = JWTManager(app)
 
-
-# TODO: Add total bank and total address to bankends in admin panel
-# TODO: Add total total users bank panel
-# TODO: Add many to many relationship between bank and an admin
-# TODO: Add one to many relationship between bank and user
 # * Refresh
 @app.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
@@ -49,14 +50,31 @@ def refresh():
     new_access_token = create_access_token(identity=current_user)
     return jsonify({"access_token": new_access_token}), 200
 
+
 # * Logout all
 # @app.route('/logout',methods=["DELETE"])
 # @jwt_required
 # def logout():
 #     jti = get_jwt("jti")
-    
 
-# *Admin 
+
+# *Admin required decorator
+def admin_required():
+    def wrapper():
+        @wraps(fn)
+        @jwt_required()
+        def decorator(*args, **kwargs):
+            claims = get_jwt()
+            if claims.get("is_admin") is True:
+                return fn(*args, **kwargs)
+            else:
+                return jsonify({"msg": "admin only"}), 403
+            return decorator
+
+        return wrapper
+
+
+# *Admin
 # ? Signup
 @app.route("/admin_sigup", methods=["POST"])
 def admin_signup():
@@ -96,9 +114,8 @@ def admin_signup():
             ),
             201,
         )
-
     except Exception:
-        return jsonify({"error":Exception}),400
+        return jsonify({"error": Exception}), 400
 
 
 # ? Login
@@ -134,7 +151,8 @@ def admin_login():
 
 
 # * Bank post
-@app.route('/bank',methods=["POST"])
+@app.route("/bank", methods=["POST"])
+@admin_required
 def create_bank():
     data = request.get_json(silent=True)
     if not data:
@@ -144,17 +162,108 @@ def create_bank():
     admin_id = Admin_login.query.get(data["id"])
 
     if not bank_name or not bank_address or not admin_id:
-        return jsonify({"error":"all field are required"}),400
+        return jsonify({"error": "all field are required"}), 400
     if admin_id is None:
-        return jsonify({"error":"Admin id does not exist"})
-    
-    newBank = Bank(bank_name=bank_name,bank_address=bank_address,admin_id=admin_id)
+        return jsonify({"error": "Admin id does not exist"}), 404
+
+    newBank = Bank(bank_name=bank_name, bank_address=bank_address, admin_id=admin_id)
     try:
         db.session.add(newBank)
         db.session.commit()
-        return jsonify({"Success":"Bank created successfully"}),201
+        return jsonify({"success": "Bank created successfully"}), 201
     except Exception:
-        return jsonify({"error":Exception})
+        return jsonify({"error": Exception})
+
+
+# * User Signup
+@app.route("/user_signup", methods=["POST"])
+def create_user():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Data is not in json format"}), 400
+    user_name = data.get("user_name")
+    user_age = data.get("user_age")
+    user_email = data.get("user_email")
+    user_password = data.get("user_password")
+    bank_id = Bank.query.get(data["id"])
+
+    if bank_id is None:
+        return jsonify({"error": "Bank id does not exist"}), 404
+
+    if not user_name or not user_age or not user_email or not user_password:
+        return jsonify({"error": "All field are required"}), 400
+    # user = user_login =
+    if user_age <= 18:
+        return jsonify({"error": "your age must be at least 18"}), 400
+    if (
+        user_login.query.filter_by(user_email=user_email).first()
+        or Admin_login.query.filter_by(admin_email=user_email).first
+    ):
+        return jsonify({"error": "Email already exist"}), 400
+    HashedPassword = generate_password_hash(user_password)
+    new_user_login = user_login(
+        user_name=user_name,
+        user_age=user_age,
+        user_email=user_email,
+        user_password=HashedPassword,
+    )
+
+    try:
+        db.session.add(new_user_login)
+        db.session.commit()
+        access_token = create_access_token(identity=user_email)
+        refresh_token = create_refresh_token(identity=user_email)
+        return (
+            jsonify(
+                {
+                    "success": {
+                        {"access_token": access_token},
+                        {"refresh_token": refresh_token},
+                    }
+                }
+            ),
+            201,
+        )
+    except Exception:
+        return jsonify({"error": Exception})
+
+# * User login
+@app.route("/user_login",methods=["POST"])
+def user_login():
+    data = request.get_json()
+    if not data:
+        return jsonify("error":"Data must be in json format"),400
+    user_email = data.get("user_email")
+    user_password = data.get("user_password")
+    if not user_email or not user_password:
+        return jsonify({"error":"all field are required"}),400
+    user = user_login.query.filter_by(user_email=user_email).first
+    if not user or not check_password_hash(user.user_password,user_password):
+        return jsonify({"error":"email or password is in correct"}),401
+    access_token=create_access_token(identity=user_email)
+    refresh_token=create_refresh_token(identity=user_email)
+    return (
+            jsonify(
+                {
+                    "success": {
+                        {"access_token": access_token},
+                        {"refresh_token": refresh_token},
+                    }
+                }
+            ),
+            201,
+        )
+@app.route('/user_account',methods=["POST"])
+def user_account():
+    data = request.get_json()
+    if not data:
+        return ({"error":"Data must be in json format"})
+    user_account_number = data.get("user_account_number") 
+    user_account_pin = data.get("user_account_pin") 
+    bank_balance = data.get("bank_balance") 
+if not user_account_number or not user_account_pin or not bank_balance:
+    return jsonify("error":"all field are required"),401
+
 
 
 

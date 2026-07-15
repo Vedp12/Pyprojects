@@ -1,4 +1,13 @@
-from flask import Flask, request, jsonify, make_response, render_template, session, redirect, url_for
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    make_response,
+    render_template,
+    session,
+    redirect,
+    url_for,
+)
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
@@ -15,13 +24,14 @@ def token_required(func):
         if not token:
             return jsonify({"Alert": "Token is missing"}), 401
         try:
-            token = token.split(" ")[1]  
+            token = token.split(" ")[1]
             payload = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
             return jsonify({"Alert": "Token has expired"}), 401
         except jwt.InvalidTokenError:
             return jsonify({"Alert": "Invalid Token"}), 401
         return func(*args, **kwargs)
+
     return decorated
 
 
@@ -66,7 +76,7 @@ def login():
                 "exp": datetime.utcnow() + timedelta(minutes=2),
             },
             app.config["SECRET_KEY"],
-            algorithm="HS256"
+            algorithm="HS256",
         )
         return jsonify({"token": token})
     else:

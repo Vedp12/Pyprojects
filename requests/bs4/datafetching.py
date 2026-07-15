@@ -7,9 +7,8 @@ headers = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     )
 }
-response = requests.get(url,headers=headers)
-soup =BeautifulSoup(response.text,"html.parser")
-
+response = requests.get(url, headers=headers)
+soup = BeautifulSoup(response.text, "html.parser")
 
 
 text_Data = soup.find_all("h3")
@@ -17,8 +16,8 @@ price_Data = soup.select(".price_color")
 stock_data = soup.select(".instock")
 
 
-with open("data.txt","a") as file:
-    for t,p,s in (zip(text_Data,price_Data,stock_data)):
+with open("data.txt", "a") as file:
+    for t, p, s in zip(text_Data, price_Data, stock_data):
         file.write("\n")
         file.write(t.text)
         file.write("\n")
@@ -27,8 +26,6 @@ with open("data.txt","a") as file:
         file.write(s.text.strip())
         file.write("\n")
         file.write("\n")
-
-
 
 
 # images= soup.find_all("img")

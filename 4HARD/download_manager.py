@@ -13,6 +13,7 @@ async def download_chunk(session, url, headers, save_path):
         async with aiofiles.open(save_path, "wb") as f:
             await f.write(content)
 
+
 async def get_file_size(session, url):
     """Get total file size using HEAD request."""
     async with session.head(url) as response:

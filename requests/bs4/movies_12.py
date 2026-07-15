@@ -1,8 +1,9 @@
 import requests
 from bs4 import BeautifulSoup as BS4
-from os import listdir,chdir,remove 
+from os import listdir, chdir, remove
+
 # mkdir,rmdir rem
-# 
+#
 
 
 url = "https://sandbox.oxylabs.io/products"
@@ -11,7 +12,7 @@ headers = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     )
 }
-response = requests.get(url, headers= headers)
+response = requests.get(url, headers=headers)
 soup = BS4(response.text, "html.parser")
 
 name = soup.select(".title")
@@ -30,12 +31,12 @@ des = soup.select(".description")
 #         file.write(i.text)
 #         file.write(j.text)
 #         file.write(k.text)
-        
-        # print(file.write(l.text.strip()))
+
+# print(file.write(l.text.strip()))
 # import os
-# chdir(r"/home/tux_106/Documents/movies")        
-for i,j,k in zip(name,price,des):
-    with open(f"{i.text}.txt","w") as file:
+# chdir(r"/home/tux_106/Documents/movies")
+for i, j, k in zip(name, price, des):
+    with open(f"{i.text}.txt", "w") as file:
         # print(i.text)
         remove(f"{i.text}.txt")
         # file.write(f"name={i.text}\nprice={j.text}\ndes={k.text}")
@@ -49,4 +50,3 @@ for i,j,k in zip(name,price,des):
     # print(j.text.strip())
     # print(k.text.strip())
 print(listdir())
- 

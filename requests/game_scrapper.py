@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
-import requests 
+import requests
 
-url ="https://sandbox.oxylabs.io/products"
+url = "https://sandbox.oxylabs.io/products"
 respond = requests.get(url)
 headers = {
     "User-Agent": (

@@ -60,5 +60,6 @@ def main():
     # get the transactions of the expense budget
     print(expense_budget.get_transactions())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

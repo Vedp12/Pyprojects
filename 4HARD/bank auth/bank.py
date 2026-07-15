@@ -19,7 +19,6 @@ from datetime import timedelta
 from models import *
 from functools import wraps
 
-
 env = Env()
 env.read_env()
 app = Flask(__name__)
@@ -41,6 +40,8 @@ finally:
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
 jwt = JWTManager(app)
+
+db = SQLAlchemy(app)
 
 # * Refresh
 @app.route("/refresh", methods=["POST"])
@@ -185,12 +186,13 @@ def create_user():
     user_age = data.get("user_age")
     user_email = data.get("user_email")
     user_password = data.get("user_password")
-    bank_id = Bank.query.get(data["id"])
+    # bank_id = Bank.query.get(data["id"])
+    user_pin = data.get("user_pin")
 
     if bank_id is None:
         return jsonify({"error": "Bank id does not exist"}), 404
 
-    if not user_name or not user_age or not user_email or not user_password:
+    if not user_name or not user_age or not user_email or not user_password or not user_pin:
         return jsonify({"error": "All field are required"}), 400
     # user = user_login =
     if user_age <= 18:
@@ -206,6 +208,7 @@ def create_user():
         user_age=user_age,
         user_email=user_email,
         user_password=HashedPassword,
+        user_pin = user_pin
     )
 
     try:
@@ -232,7 +235,7 @@ def create_user():
 def user_login():
     data = request.get_json()
     if not data:
-        return jsonify("error":"Data must be in json format"),400
+        return jsonify({"error":"Data must be in json format"}),400
     user_email = data.get("user_email")
     user_password = data.get("user_password")
     if not user_email or not user_password:
@@ -253,6 +256,8 @@ def user_login():
             ),
             201,
         )
+
+# * User Account
 @app.route('/user_account',methods=["POST"])
 def user_account():
     data = request.get_json()
@@ -261,12 +266,27 @@ def user_account():
     user_account_number = data.get("user_account_number") 
     user_account_pin = data.get("user_account_pin") 
     bank_balance = data.get("bank_balance") 
-if not user_account_number or not user_account_pin or not bank_balance:
-    return jsonify("error":"all field are required"),401
+
+    bank_id = Bank.query.get(data["id"])
+    user_id = user_id.query.get(data["id"])
+# if not user_account_number or not user_account_pin or not bank_balance:
 
 
+    if not user_account_number or not user_account_pin or not bank_balance:
+        return jsonify({"error":"all field are required"}),401
+    if bank_id is None:
+        return jsonify({"error":"Bank does not exist"}),404
 
+    if user_id is None:
+        return jsonify({"error":"User does not exist"}),404
 
+    new_user_account = user_login(user_account_number,user_account_pin,bank_balance)
+    try:
+        db.session.add(new_user_account)
+        db.session.commit()
+    except Exception:
+        return jsonify({"error":Exception}),400
+        
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

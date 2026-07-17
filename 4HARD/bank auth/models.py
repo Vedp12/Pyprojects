@@ -1,8 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import url_for
-
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
+
 db = SQLAlchemy()
 
 
@@ -29,10 +28,9 @@ class Bank(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     bank_name = db.Column(db.String(160), nullable=False)
     bank_address = db.Column(db.String(160), nullable=False)
-    user_account = db.relationship("user_account", lazy=True, backref="bank")
     bank_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    
     admin_id = db.Column(db.Integer, db.ForeignKey("admin_login.id"), nullable=False)
+    user_accounts = db.relationship("User_account", lazy=True, backref="bank")
 
 
 class User_login(db.Model):
@@ -40,44 +38,40 @@ class User_login(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(160), nullable=False)
     user_age = db.Column(db.Integer, nullable=False)
-    user_email = db.Column(db.String(40))
+    user_email = db.Column(db.String(160), unique=True, nullable=False)
     user_password = db.Column(db.String(150), nullable=False)
-    user_account = db.relationship("user_account", lazy=True, backref="user")
     user_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user_pin = db.Column(db.String(100), nullable=False)
+    user_accounts = db.relationship("User_account", lazy=True, backref="user")
+
 
 class User_account(db.Model):
     __tablename__ = "user_accounts"
     id = db.Column(db.Integer, primary_key=True)
-    user_account_number = db.Column(db.Integer, nullable=True)
-    user_pin = db.Column(db.Integer, nullable=False)
+    user_account_number = db.Column(db.String(50), unique=True, nullable=False)
+    bank_balance = db.Column(db.Float, default=0.0)
 
-    bank_balance = db.Column(db.Float)
-    userDeposit = db.relationship("user_deposit", lazy=True, backref="useraccount")
-    userWithdraw = db.relationship("user_withdraw", lazy=True, backref="useraccount")
+    user_deposits = db.relationship("User_deposit", lazy=True, backref="useraccount")
+    user_withdrawals = db.relationship("User_withdraw", lazy=True, backref="useraccount")
 
     user_id = db.Column(db.Integer, db.ForeignKey("user_login.id"), nullable=False)
     bank_id = db.Column(db.Integer, db.ForeignKey("banks.id"), nullable=False)
 
 
 class User_deposit(db.Model):
+    __tablename__ = "user_deposits"
     id = db.Column(db.Integer, primary_key=True)
-    Deposit_Value = db.Column(db.Float)
-    pin = db.Column(db.Integer)
+    deposit_value = db.Column(db.Float, nullable=False)
+    transaction_id = db.Column(db.String(120), nullable=False, unique=True)
+    transaction_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user_account_id = db.Column(db.Integer, db.ForeignKey("user_accounts.id"), nullable=False)
 
-    Transaction_id=db.Column(db.string(120),nullable=False)
-    Transaction_date=db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    user_account_id = db.Column(
-        db.Integer, db.ForeignKey("user_accounts.id"), nullable=False
-    )
 
 class User_withdraw(db.Model):
+    __tablename__ = "user_withdrawals"
     id = db.Column(db.Integer, primary_key=True)
-    withdrawal_Value = db.Column(db.Float)
-    pin = db.Column(db.Integer)
-    Transaction_id=db.Column(db.string(120),nullable=False)
-
-    Transaction_date=db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-
-    user_account_id = db.Column(
-        db.Integer, db.ForeignKey("user_accounts.id"), nullable=False
-    )
+    withdrawal_value = db.Column(db.Float, nullable=False)
+    transaction_id = db.Column(db.String(120), nullable=False, unique=True)
+    transaction_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    user_account_id = db.Column(db.Integer, db.ForeignKey("user_accounts.id"), nullable=False)
